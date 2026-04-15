@@ -1,50 +1,73 @@
 package com.nextvibe.solanap2pnfc
 
+import android.content.ComponentName
+import android.content.pm.PackageManager
+import android.os.Handler
+import android.os.Looper
 import expo.modules.kotlin.modules.Module
 import expo.modules.kotlin.modules.ModuleDefinition
-import java.net.URL
 
+/**
+ * The Expo Module bridge that exposes native Android NFC HCE capabilities to React Native (JS/TS).
+ */
 class SolanaP2PnfcModule : Module() {
-  // Each module class must implement the definition function. The definition consists of components
-  // that describes the module's functionality and behavior.
-  // See https://docs.expo.dev/modules/module-api for more details about available components.
   override fun definition() = ModuleDefinition {
-    // Sets the name of the module that JavaScript code will use to refer to the module. Takes a string as an argument.
-    // Can be inferred from module's class name, but it's recommended to set it explicitly for clarity.
-    // The module will be accessible from `requireNativeModule('SolanaP2Pnfc')` in JavaScript.
-    Name("SolanaP2Pnfc")
+    Name("SolanaP2Pnfc") 
 
-    // Defines constant property on the module.
-    Constant("PI") {
-      Math.PI
-    }
+    // Defines the events that this native module can emit to the JavaScript side
+    Events("onNfcRead")
 
-    // Defines event names that the module can send to JavaScript.
-    Events("onChange")
-
-    // Defines a JavaScript synchronous function that runs the native code on the JavaScript thread.
-    Function("hello") {
-      "Hello world! 👋"
-    }
-
-    // Defines a JavaScript function that always returns a Promise and whose native code
-    // is by default dispatched on the different thread than the JavaScript runtime runs on.
-    AsyncFunction("setValueAsync") { value: String ->
-      // Send an event to JavaScript.
-      sendEvent("onChange", mapOf(
-        "value" to value
-      ))
-    }
-
-    // Enables the module to be used as a native view. Definition components that are accepted as part of
-    // the view definition: Prop, Events.
-    View(SolanaP2PnfcView::class) {
-      // Defines a setter for the `url` prop.
-      Prop("url") { view: SolanaP2PnfcView, url: URL ->
-        view.webView.loadUrl(url.toString())
+    /**
+     * Starts the NFC Host Card Emulation (HCE) to broadcast the provided URL.
+     * @param url The string (e.g., Solana transaction link) to be shared via NFC.
+     */
+    Function("startSharing") { url: String ->
+      // 1. Pass the data to the background NFC service state
+      NdefHostApduService.urlToShare = url
+      
+      // 2. Set up the callback for when another device successfully reads the NFC payload
+      NdefHostApduService.onReadListener = {
+          // The NFC transaction occurs on a background system thread.
+          // We must use a Handler to hop back to the Main (UI) thread before sending
+          // the event to React Native. Doing this on a background thread can cause crashes.
+          Handler(Looper.getMainLooper()).post {
+              try {
+                  this@SolanaP2PnfcModule.sendEvent("onNfcRead")
+              } catch (e: Exception) {
+                  // Silently catch exceptions in case the JS context is already destroyed
+              }
+          }
       }
-      // Defines an event that the view can send to JavaScript.
-      Events("onLoad")
+
+      // 3. Dynamically enable the HCE Service
+      val context = appContext.reactContext
+      if (context != null) {
+          val pm = context.packageManager
+          pm.setComponentEnabledSetting(
+              ComponentName(context, NdefHostApduService::class.java),
+              PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
+              PackageManager.DONT_KILL_APP
+          )
+      }
+    }
+
+    /**
+     * Stops the NFC broadcasting and releases system resources.
+     */
+    Function("stopSharing") {
+      // Clear the listener to prevent memory leaks and rogue callbacks
+      NdefHostApduService.onReadListener = null 
+      
+      // Dynamically disable the HCE Service.
+      val context = appContext.reactContext
+      if (context != null) {
+          val pm = context.packageManager
+          pm.setComponentEnabledSetting(
+              ComponentName(context, NdefHostApduService::class.java),
+              PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
+              PackageManager.DONT_KILL_APP
+          )
+      }
     }
   }
 }
