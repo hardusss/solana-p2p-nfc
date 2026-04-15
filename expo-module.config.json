@@ -1,0 +1,9 @@
+{
+  "platforms": ["apple", "android", "web"],
+  "apple": {
+    "modules": ["SolanaP2PnfcModule"]
+  },
+  "android": {
+    "modules": ["com.nextvibe.solanap2pnfc.SolanaP2PnfcModule"]
+  }
+}

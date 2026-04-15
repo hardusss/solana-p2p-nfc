@@ -1,0 +1,10 @@
+{
+  "extends": "expo/tsconfig.base",
+  "compilerOptions": {
+    "strict": true,
+    "paths": {
+      "@nextvibe/solana-p2p-nfc": ["../src/index"],
+      "@nextvibe/solana-p2p-nfc/*": ["../src/*"]
+    }
+  }
+}
