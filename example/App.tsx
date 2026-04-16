@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Button, SafeAreaView, Text, View, TextInput, StyleSheet } from 'react-native';
+import { Button, Text, View, TextInput, StyleSheet } from 'react-native';
 
 // Import our custom bridge functions
 import { startSharing, stopSharing, addNfcReadListener } from '@nextvibe/solana-p2p-nfc';
@@ -11,7 +11,7 @@ export default function App() {
   // Hardcoded Solana Pay transaction link.
   // Format: solana:<recipient_address>?amount=<amount>&label=<merchant_name>&message=<memo>
   const [url, setUrl] = useState(
-    'solana:DanyLoxxxXXXXxxxxXXXXxxxxXXXXxxxxXXXXxxxxNV?amount=0.1&label=NextVibe&message=P2P%20Transfer'
+    'solana:Fw35M3Pmb1YhBw6F85xQn1N3V63T16uXX19U3d4z5jD9?amount=0.01&label=NextVibe&message=IRL%20Connect'
   );
 
   useEffect(() => {
@@ -46,7 +46,7 @@ export default function App() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
       <View style={styles.card}>
         <Text style={styles.header}>Solana Pay NFC Sender</Text>
 
@@ -85,7 +85,7 @@ export default function App() {
           </Text>
         </View>
       </View>
-    </SafeAreaView>
+    </View>
   );
 }
 
