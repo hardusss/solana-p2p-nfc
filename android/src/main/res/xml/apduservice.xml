@@ -1,7 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<host-apdu-service xmlns:android="http://schemas.android.com/apk/res/android"
+<!--
+  Registers this app as the handler for the NDEF Application AID.
+  AID D2760000850101 is the NFC Forum NDEF Tag Application AID (Type 4 Tag).
+  android:requireDeviceUnlock="false" allows reading even from the lock screen.
+-->
+<host-apdu-service
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:description="@string/nfc_service_description"
     android:requireDeviceUnlock="false">
+
     <aid-group android:category="other">
-        <aid-filter android:name="D2760000850101" /> 
+        <aid-filter android:name="D2760000850101"/>
     </aid-group>
+
 </host-apdu-service>

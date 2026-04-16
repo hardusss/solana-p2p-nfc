@@ -1,19 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <!-- Required for Host Card Emulation -->
+    <uses-permission android:name="android.permission.NFC"/>
+    <uses-feature android:name="android.hardware.nfc.hce" android:required="true"/>
+
     <application>
+        <!--
+          HCE service — disabled by default so it doesn't interfere with
+          Google Wallet or other NFC apps until the user explicitly starts sharing.
+          android:enabled="false" is the key: the module enables/disables it at runtime.
+        -->
         <service
             android:name=".NdefHostApduService"
             android:exported="true"
-            android:enabled="false" android:permission="android.permission.BIND_NFC_SERVICE">
-                    
+            android:enabled="false"
+            android:permission="android.permission.BIND_NFC_SERVICE">
+
             <intent-filter>
-                <action android:name="android.nfc.cardemulation.action.HOST_APDU_SERVICE" />
+                <action android:name="android.nfc.cardemulation.action.HOST_APDU_SERVICE"/>
             </intent-filter>
-            
+
             <meta-data
                 android:name="android.nfc.cardemulation.host_apdu_service"
-                android:resource="@xml/apduservice" />
+                android:resource="@xml/apduservice"/>
         </service>
     </application>
 

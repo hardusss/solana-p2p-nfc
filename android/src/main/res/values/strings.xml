@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="nfc_service_description">Solana Pay NFC Sharing</string>
+</resources>
